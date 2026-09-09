@@ -1,0 +1,15 @@
+outputs/
+reports/
+artifacts/
+character/hero_candidates/
+character/dataset_raw/
+character/dataset_refined/
+character/dataset_rejected/
+character/dataset/*.png
+character/hero.png
+*.safetensors
+*.pth
+.venv/
+__pycache__/
+output/
+.env

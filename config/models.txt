@@ -1,0 +1,41 @@
+# Models to download. 00_setup.sh reads this. Format: DEST_DIR | URL | NOTE
+# DEST_DIR is relative to ComfyUI/models/
+
+# --- Flux.1-dev (GATED: accept license, needs HF_TOKEN) ---
+unet            | https://huggingface.co/black-forest-labs/FLUX.1-dev/resolve/main/flux1-dev.safetensors        | ~23GB; or use fp8 below to save VRAM
+unet            | https://huggingface.co/Comfy-Org/flux1-dev/resolve/main/flux1-dev-fp8.safetensors             | fp8, ~11GB, preferred on 4090
+clip            | https://huggingface.co/comfyanonymous/flux_text_encoders/resolve/main/t5xxl_fp8_e4m3fn.safetensors | T5
+clip            | https://huggingface.co/comfyanonymous/flux_text_encoders/resolve/main/clip_l.safetensors      |
+vae             | https://huggingface.co/black-forest-labs/FLUX.1-dev/resolve/main/ae.safetensors                | Flux VAE
+
+# --- Flux ControlNet (OpenPose) ---
+controlnet      | https://huggingface.co/InstantX/FLUX.1-dev-Controlnet-Union/resolve/main/diffusion_pytorch_model.safetensors | rename to flux-controlnet-union.safetensors; supports openpose mode
+
+# --- Flux IP-Adapter (used only if we also try IPA on Flux; optional) ---
+# xlabs/ipadapter | https://huggingface.co/XLabs-AI/flux-ip-adapter/resolve/main/ip_adapter.safetensors        | optional
+
+# --- SDXL base ---
+checkpoints     | https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/resolve/main/sd_xl_base_1.0.safetensors | or a photoreal finetune (RealVisXL V5.0) for better skin
+checkpoints     | https://huggingface.co/SG161222/RealVisXL_V5.0/resolve/main/RealVisXL_V5.0.safetensors        | recommended base for Pipeline B
+
+# --- IP-Adapter (SDXL, FaceID) ---
+ipadapter       | https://huggingface.co/h94/IP-Adapter-FaceID/resolve/main/ip-adapter-faceid-plusv2_sdxl.bin  | FaceID Plus v2
+ipadapter       | https://huggingface.co/h94/IP-Adapter-FaceID/resolve/main/ip-adapter-faceid-plusv2_sdxl_lora.safetensors | its companion LoRA
+clip_vision     | https://huggingface.co/h94/IP-Adapter/resolve/main/models/image_encoder/model.safetensors      | rename CLIP-ViT-H-14.safetensors
+
+# --- InstantID (SDXL) ---
+instantid       | https://huggingface.co/InstantX/InstantID/resolve/main/ip-adapter.bin                        | -> models/instantid/
+controlnet      | https://huggingface.co/InstantX/InstantID/resolve/main/ControlNetModel/diffusion_pytorch_model.safetensors | -> models/controlnet/instantid-controlnet.safetensors
+
+# --- SDXL ControlNet OpenPose ---
+controlnet      | https://huggingface.co/thibaud/controlnet-openpose-sdxl-1.0/resolve/main/OpenPoseXL2.safetensors |
+
+# --- Upscaler ---
+upscale_models  | https://huggingface.co/uwg/upscaler/resolve/main/ESRGAN/4x-UltraSharp.pth                     |
+
+# --- Face detection / eval (InsightFace) ---
+# antelopev2 (InstantID) and buffalo_l (eval) auto-download via insightface on first run;
+# 00_setup.sh pre-fetches them to ~/.insightface/models/
+
+# --- Auto-caption ---
+# Florence-2 base downloads via transformers on first use (01_build_dataset.py --stage caption)

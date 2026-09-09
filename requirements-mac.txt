@@ -1,0 +1,8 @@
+# Local eval only (runs on Apple Silicon, CPU). Not the generation stack.
+insightface==0.7.3
+onnxruntime==1.19.2
+opencv-python-headless==4.10.0.84
+numpy==1.26.4
+matplotlib==3.9.2
+pillow==10.4.0
+pyyaml==6.0.2

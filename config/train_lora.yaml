@@ -1,0 +1,67 @@
+# ai-toolkit config for the Mara Vance Flux character LoRA.
+# https://github.com/ostris/ai-toolkit  ->  python run.py config/train_lora.yaml
+---
+job: extension
+config:
+  name: mara_lora
+  process:
+    - type: sd_trainer
+      training_folder: /workspace/svetlana/output
+      device: cuda:0
+      trigger_word: mara_vance
+
+      network:
+        type: lora
+        linear: 16
+        linear_alpha: 16
+
+      save:
+        dtype: float16
+        save_every: 250
+        max_step_saves_to_keep: 8
+
+      datasets:
+        - folder_path: /workspace/svetlana/character/dataset
+          caption_ext: txt
+          caption_dropout_rate: 0.05
+          shuffle_tokens: false
+          cache_latents_to_disk: true
+          resolution: [768, 1024]
+
+      train:
+        batch_size: 1
+        steps: 2200
+        gradient_accumulation_steps: 1
+        train_unet: true
+        train_text_encoder: false
+        gradient_checkpointing: true
+        noise_scheduler: flowmatch
+        optimizer: adamw8bit
+        lr: 1e-4
+        ema_config:
+          use_ema: true
+          ema_decay: 0.99
+        dtype: bf16
+
+      model:
+        name_or_path: black-forest-labs/FLUX.1-dev
+        is_flux: true
+        quantize: true          # fits 24GB
+
+      sample:
+        sampler: flowmatch
+        sample_every: 250
+        width: 896
+        height: 1152
+        prompts:
+          - "a photo of mara_vance, walking on a rocky ridge trail, looking back over her shoulder, windy, strong sun"
+          - "a photo of mara_vance, tight portrait at dusk, hair down, calm direct gaze"
+          - "a photo of mara_vance, crouching in a dig trench brushing soil off a stone, midday sun"
+          - "a photo of mara_vance sitting at a table writing in a notebook, tent interior, side light"
+        neg: "glamour, heavy makeup, airbrushed, plastic skin, blonde, blue eyes"
+        seed: 42
+        guidance_scale: 3.5
+        sample_steps: 28
+meta:
+  name: mara_lora
+  version: '1.0'

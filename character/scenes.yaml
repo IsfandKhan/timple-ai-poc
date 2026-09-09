@@ -1,0 +1,126 @@
+# 12 story scenes for Mara Vance — one field expedition, dawn to night.
+# Each pipeline generates every scene with the SAME seed for comparability.
+# prompt = scene-specific text ONLY; the runner prepends the canonical description
+#          from character_spec.md and the trigger word.
+# pose   = filename in character/poses/ used as OpenPose ControlNet input.
+# framing = close | half | full  (drives crop + face size expectations in eval)
+
+global_style: >
+  photorealistic, 35mm, natural light, shallow depth of field, film grain,
+  documentary photography, realistic skin texture
+
+negative: >
+  glamour, heavy makeup, airbrushed, perfect symmetry, influencer pose, duck lips,
+  plastic skin, over-sharpened, cartoon, illustration, 3d render, extra fingers,
+  deformed hands, blonde hair, blue eyes
+
+scenes:
+  - id: 01
+    title: Dawn at camp
+    prompt: >
+      standing outside a canvas tent at first light, holding an enamel mug of coffee,
+      breath faintly visible, mountains behind, wearing the olive field jacket,
+      calm and half-awake expression
+    pose: stand_relaxed.png
+    framing: half
+    seed: 101
+
+  - id: 02
+    title: Field notes
+    prompt: >
+      sitting on a folding stool at a small table, writing in a leather field notebook,
+      brow furrowed in concentration, morning side light through the tent flap,
+      jacket on, sleeves rolled
+    pose: seated_writing.png
+    framing: half
+    seed: 102
+
+  - id: 03
+    title: Examining the artifact
+    prompt: >
+      crouching over a half-buried stone fragment in a dig trench, brushing soil away
+      with a small brush, focused, dust in the air, hard midday sun, jacket off, white tee
+    pose: crouch_reach.png
+    framing: full
+    seed: 103
+
+  - id: 04
+    title: Ridge hike
+    prompt: >
+      walking along a rocky ridge trail with a daypack, looking back over her shoulder
+      toward the camera, wind moving loose strands of hair, wide dry landscape, strong sun
+    pose: walk_lookback.png
+    framing: full
+    seed: 104
+
+  - id: 05
+    title: Radio call
+    prompt: >
+      standing, holding a handheld radio to her mouth mid-sentence, other hand on hip,
+      alert expression, overcast flat light, jacket on
+    pose: stand_radio.png
+    framing: half
+    seed: 105
+
+  - id: 06
+    title: The storm
+    prompt: >
+      hunched under a rain shell in heavy rain, one hand shielding her eyes, squinting,
+      soaked hair strands on her face, grey downpour, dramatic low light
+    pose: hunch_shield.png
+    framing: half
+    seed: 106
+
+  - id: 07
+    title: Village market
+    prompt: >
+      standing at a market stall in a small mountain village, holding up a woven textile
+      to inspect it, slight smile, warm afternoon light, background of stalls and people, jacket on
+    pose: stand_inspect.png
+    framing: full
+    seed: 107
+
+  - id: 08
+    title: Shared meal
+    prompt: >
+      seated at a long wooden table with locals, mid-conversation, laughing lightly,
+      hands gesturing, string lights overhead, warm evening tones, jacket off
+    pose: seated_talk.png
+    framing: half
+    seed: 108
+
+  - id: 09
+    title: Close portrait
+    prompt: >
+      tight head-and-shoulders portrait at dusk, soft blue hour light, hair down,
+      direct calm gaze into the lens, subtle tiredness around the eyes
+    pose: portrait_front.png
+    framing: close
+    seed: 109
+
+  - id: 10
+    title: Lantern work
+    prompt: >
+      at night in the tent, leaning over the artifact under a battery lantern,
+      warm hard light from below, wool sweater under the open jacket, absorbed expression
+    pose: lean_examine.png
+    framing: half
+    seed: 110
+
+  - id: 11
+    title: Stargazing
+    prompt: >
+      lying back against a rock looking up at a dense night sky, hands behind head,
+      relaxed, faint starlight and a distant campfire glow on one side of her face
+    pose: lie_back.png
+    framing: full
+    seed: 111
+
+  - id: 12
+    title: Departure
+    prompt: >
+      standing by a dusty parked truck at sunrise, backpack on one shoulder, looking
+      off toward the road, quiet satisfied expression, golden low sun, jacket on
+    pose: stand_pack.png
+    framing: full
+    seed: 112

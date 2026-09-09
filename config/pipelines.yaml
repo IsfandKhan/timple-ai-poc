@@ -1,0 +1,47 @@
+# Per-pipeline knobs. 03_generate.py reads this and patches the workflow template
+# (comfyui/<workflow>.api.json) by node title before queuing.
+
+common:
+  width: 896
+  height: 1152          # portrait; scenes.yaml framing may override crop in eval only
+  steps: 30
+  base_negative: >
+    glamour, heavy makeup, airbrushed, perfect symmetry, influencer pose, duck lips,
+    plastic skin, over-sharpened, cartoon, illustration, 3d render, extra fingers,
+    deformed hands, blonde hair, blue eyes
+  face_detailer:
+    denoise: 0.35
+    steps: 20
+  upscale:
+    model: 4x-UltraSharp.pth
+    factor: 2.0
+
+pipelines:
+
+  flux_lora:
+    workflow: flux_lora
+    checkpoint_unet: flux1-dev-fp8.safetensors
+    lora: mara_lora.safetensors        # copied from output/mara_lora/ after 02_train_lora.sh
+    lora_strength: 0.95
+    trigger: "mara_vance"
+    cfg: 3.5
+    sampler: euler
+    scheduler: simple
+    controlnet: flux-controlnet-union.safetensors
+    controlnet_mode: openpose
+    controlnet_strength: 0.55
+    # identity comes from the LoRA; no reference image at inference
+
+  sdxl_ref:
+    workflow: sdxl_ref
+    checkpoint: RealVisXL_V5.0.safetensors
+    cfg: 5.0
+    sampler: dpmpp_2m_sde_gpu
+    scheduler: karras
+    reference_image: character/hero.png    # identity source (no training)
+    ipadapter_model: ip-adapter-faceid-plusv2_sdxl.bin
+    ipadapter_weight: 0.75
+    instantid_weight: 0.65
+    instantid_cn_strength: 0.55
+    controlnet_openpose: OpenPoseXL2.safetensors
+    controlnet_openpose_strength: 0.6
