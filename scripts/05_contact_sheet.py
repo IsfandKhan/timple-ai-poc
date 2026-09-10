@@ -84,8 +84,14 @@ def compare_sheet(a_dir, b_dir, out_path):
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--dir", help="a single outputs/<pipeline> dir")
+    ap.add_argument("--compare", nargs=2, metavar=("A", "B"), help="two dirs, side by side")
     a = ap.parse_args()
     rep = ROOT / "reports"
+
+    if a.compare:
+        A, B = ROOT / a.compare[0], ROOT / a.compare[1]
+        compare_sheet(A, B, rep / f"contact_compare_{A.name}_vs_{B.name}.png")
+        return
 
     if a.dir:
         d = ROOT / a.dir

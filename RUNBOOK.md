@@ -13,39 +13,47 @@ two long unattended waits to save money — network volume keeps all data.
 
 ## H0–H3 — Pod up, environment, smoke test
 
-1. RunPod → Deploy → **RTX 4090**, community cloud, template
-   "RunPod PyTorch 2.4" (CUDA 12.4). 50 GB network volume mounted at `/workspace`.
-2. SSH / web terminal:
+1. RunPod → Deploy → **RTX 4090**, Secure Cloud, template **official "RunPod PyTorch 2.x"**
+   (its `/start.sh` handles sshd + injects your account SSH key). Container disk 30 GB,
+   **Volume disk 150 GB** at `/workspace`. Add your SSH pubkey under Settings → SSH Public Keys.
+2. `rsync` this repo to `/workspace/svetlana/` (incl. `.env` with `HF_TOKEN`). Then:
    ```bash
-   cd /workspace
-   git clone https://github.com/<you>/svetlana.git   # or scp this folder up
-   cd svetlana
-   export HF_TOKEN=hf_xxx
-   bash scripts/00_setup.sh
+   cd /workspace/svetlana && export HF_TOKEN=$(grep -o 'hf_[A-Za-z0-9]*' .env)
+   bash scripts/00_setup.sh          # in tmux — ~15 min pip + ~8 min models (hf_transfer)
    ```
-   Installs ComfyUI + custom nodes, downloads Flux/SDXL/IP-Adapter/InstantID/ControlNet/upscaler/InsightFace.
-3. Start ComfyUI: `cd /workspace/ComfyUI && python main.py --listen 0.0.0.0 --port 8188` (run in `tmux`).
-   Forward port 8188 (RunPod "Connect" → HTTP 8188).
-4. Smoke test both base graphs:
+   Pins torch **2.8.0+cu128** (ComfyUI HEAD needs ≥2.7; cu128 works w/ driver ≥570),
+   clones ComfyUI + 10 custom nodes, `fetch_models.py` pulls ~48 GB.
+3. Start ComfyUI in `tmux`:
+   `cd /workspace/ComfyUI && HF_HOME=/workspace/hf python main.py --listen 127.0.0.1 --port 8188`
+   Access the GUI by SSH tunnel: `ssh -L 8188:localhost:8188 root@<ip> -p <port>`.
+4. Workflows are **pre-authored** (`comfyui/*.api.json`). Smoke test:
    ```bash
-   python scripts/03_generate.py --smoke --pipeline sdxl_ref
    python scripts/03_generate.py --smoke --pipeline flux_lora --no-lora
+   python scripts/03_generate.py --smoke --pipeline sdxl_ref     # needs a character/hero.png; use any face for the smoke
    ```
-   Expect one image each in `outputs/_smoke/`.
+   One image each in `outputs/_smoke/`. Fix any `node_errors` against `localhost:8188/object_info`.
+
+**Host note:** if the pod lands on a contended host (`cat /proc/loadavg` » vCPU count),
+cold model loads are slow but steady-state sampling is normal. If CUDA is dead
+(`torch.cuda.is_available()` False while `nvidia-smi` works) → Stop/Start; if still dead → redeploy.
 
 ## H3–H7 — Character hero + dataset
 
-1. `python scripts/01_build_dataset.py --stage hero --n 8`
-   → `character/hero_candidates/`. Pick best, copy to `character/hero.png`, note its seed
-   into `character/character_spec.md`.
-2. `python scripts/01_build_dataset.py --stage expand --n 32`
+1. `python scripts/01_build_dataset.py --stage hero --n 8` → `character/hero_candidates/`.
+   Pick best → `cp character/hero_candidates/hero_0X.png character/hero.png`, note seed
+   (`1000 + X*137`) into `character/character_spec.md`.
+2. `python scripts/01_build_dataset.py --stage poses` → 12 generic pose refs in
+   `character/poses/` (DWPose turns them into skeletons downstream).
+3. `python scripts/01_build_dataset.py --stage expand --n 32`
    → `character/dataset_raw/` (SDXL + InstantID + IP-Adapter FaceID off `hero.png`).
-3. `python scripts/01_build_dataset.py --stage refine`
-   → FaceDetailer + upscale → `character/dataset_refined/`.
-4. Auto-filter: `python scripts/04_eval.py --dir character/dataset_refined --ref character/hero.png --filter 0.60 --out reports/dataset`
-   → moves rejects to `character/dataset_rejected/`.
-5. Manual: keep best 20–25 in `character/dataset/`.
-6. Caption: `python scripts/01_build_dataset.py --stage caption --trigger mara_vance`
+4. `python scripts/01_build_dataset.py --stage refine`
+   → FaceDetailer + upscale → `character/dataset_refined/` (copies through if no
+   `detail_only.api.json` — the base sdxl_ref graph already has no detailer, so build that
+   file or accept raw).
+5. Auto-filter: `python scripts/04_eval.py --dir character/dataset_raw --ref character/hero.png --filter 0.60 --out reports/dataset`
+   → moves rejects to `character/dataset_raw_rejected/`.
+6. Manual: keep best 20–25 in `character/dataset/`.
+7. Caption: `python scripts/01_build_dataset.py --stage caption --trigger mara_vance`
    → writes `.txt` next to each image. Skim and fix.
 
 ## H7–H9 — Kick off LoRA training

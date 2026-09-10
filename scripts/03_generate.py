@@ -35,10 +35,10 @@ def build_prompt(scene, spec_desc, trigger, global_style):
 
 
 def canonical_desc():
-    # the ">"-quoted block under "Canonical description" in character_spec.md
-    text = (ROOT / "character" / "character_spec.md").read_text()
-    lines = text.splitlines()
-    i = next(k for k, l in enumerate(lines) if l.startswith("> mara_vance"))
+    # the first ">"-quoted block after the "## Canonical description" header
+    lines = (ROOT / "character" / "character_spec.md").read_text().splitlines()
+    h = next(k for k, l in enumerate(lines) if l.startswith("## Canonical description"))
+    i = next(k for k in range(h + 1, len(lines)) if lines[k].startswith(">"))
     out = []
     while i < len(lines) and lines[i].startswith(">"):
         out.append(lines[i].lstrip("> ").strip())
@@ -66,6 +66,7 @@ def patch_flux(wf, common, pipe):
     S(wf, "unet", "unet_name", pipe["checkpoint_unet"])
     S(wf, "lora", "lora_name", pipe["lora"])
     S(wf, "lora", "strength_model", pipe["lora_strength"])
+    S(wf, "flux_guidance", "guidance", pipe["guidance"])
     S(wf, "controlnet_loader", "control_net_name", pipe["controlnet"])
     S(wf, "controlnet_apply", "strength", pipe["controlnet_strength"])
 
@@ -77,7 +78,7 @@ def patch_sdxl(wf, common, pipe, ref_name):
     S(wf, "ipadapter", "weight", pipe["ipadapter_weight"])
     S(wf, "instantid_apply", "weight", pipe["instantid_weight"])
     S(wf, "instantid_apply", "start_at", 0.0)
-    S(wf, "instantid_apply", "end_at", 1.0)
+    S(wf, "instantid_apply", "end_at", pipe.get("instantid_end_at", 1.0))
     S(wf, "controlnet_pose_apply", "strength", pipe["controlnet_openpose_strength"])
 
 
@@ -112,14 +113,15 @@ def main():
     if args.pipeline == "sdxl_ref":
         ref_name = comfy.upload_image(ROOT / pipe["reference_image"], "refs")
 
+    neutral_pose = ROOT / "character" / "poses" / "_neutral.png"
     for scene in scenes:
         wf = comfy.load_workflow(pipe["workflow"])
         seed = scene["seed"] + (1000 if args.seed_shift else 0)
         prompt = build_prompt(scene, desc, trigger, sc["global_style"])
-        pose_name = None
         pose_path = ROOT / "character" / "poses" / scene["pose"]
-        if pose_path.exists():
-            pose_name = comfy.upload_image(pose_path, "poses")
+        if not pose_path.exists():
+            pose_path = neutral_pose            # keeps the graph valid; pair with low CN strength
+        pose_name = comfy.upload_image(pose_path, "poses")
 
         patch_common(wf, common, pipe, prompt, negative, seed, pose_name)
         if args.pipeline == "flux_lora":

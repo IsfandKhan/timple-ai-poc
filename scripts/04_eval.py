@@ -61,8 +61,11 @@ def _get_app():
     global _APP
     if _APP is None:
         from insightface.app import FaceAnalysis
-        app = FaceAnalysis(name="buffalo_l", providers=["CPUExecutionProvider"])
-        app.prepare(ctx_id=-1, det_size=(640, 640))
+        import onnxruntime as ort
+        gpu = "CUDAExecutionProvider" in ort.get_available_providers()
+        provs = ["CUDAExecutionProvider", "CPUExecutionProvider"] if gpu else ["CPUExecutionProvider"]
+        app = FaceAnalysis(name="buffalo_l", providers=provs)
+        app.prepare(ctx_id=0 if gpu else -1, det_size=(640, 640))
         _APP = app
     return _APP
 

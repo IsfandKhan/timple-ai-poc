@@ -6,16 +6,29 @@ set -euo pipefail
 
 : "${HF_TOKEN:?set HF_TOKEN (accept the FLUX.1-dev license on HuggingFace first)}"
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-COMFY="${COMFY:-/workspace/ComfyUI}"
-MODELS_TXT="$ROOT/config/models.txt"
+export COMFY="${COMFY:-/workspace/ComfyUI}"
+export HF_HOME="${HF_HOME:-/workspace/hf}"
+# keep pip cache on the persistent volume so a pod restart (which wipes /) re-installs fast
+export PIP_CACHE_DIR="${PIP_CACHE_DIR:-/workspace/pip-cache}"
+mkdir -p "$HF_HOME" "$PIP_CACHE_DIR"
+
+# ComfyUI's requirements.txt lists bare torch/vision/audio -> pip will pull a CUDA build
+# newer than the host driver (seen: 2.14+cu130 on a 570/cu12.8 driver -> CUDA False).
+# Pin the trio and constrain every downstream install. cu128 works with driver >=570;
+# ComfyUI HEAD's comfy_kitchen needs torch >= 2.7.
+TORCH="torch==2.8.0 torchvision==0.23.0 torchaudio==2.8.0"
+TORCH_IDX="https://download.pytorch.org/whl/cu128"
+CONSTRAINTS=/tmp/constraints.txt
+printf 'torch==2.8.0\ntorchvision==0.23.0\ntorchaudio==2.8.0\n' > "$CONSTRAINTS"
+
+echo "== torch =="
+pip install -q $TORCH --index-url "$TORCH_IDX"
 
 echo "== ComfyUI =="
-if [ ! -d "$COMFY" ]; then
-  git clone https://github.com/comfyanonymous/ComfyUI "$COMFY"
-fi
+[ -d "$COMFY" ] || git clone https://github.com/comfyanonymous/ComfyUI "$COMFY"
 cd "$COMFY"
-pip install -q -r requirements.txt
-pip install -q "huggingface_hub[cli]" onnxruntime-gpu insightface==0.7.3 \
+pip install -q -c "$CONSTRAINTS" -r requirements.txt
+pip install -q -c "$CONSTRAINTS" huggingface_hub hf_transfer onnxruntime-gpu insightface==0.7.3 \
   opencv-python-headless matplotlib pyyaml einops timm
 
 echo "== custom nodes =="
@@ -32,35 +45,30 @@ clone https://github.com/XLabs-AI/x-flux-comfyui
 clone https://github.com/kijai/ComfyUI-Florence2
 clone https://github.com/rgthree/rgthree-comfy
 for d in */; do
-  [ -f "$d/requirements.txt" ] && pip install -q -r "$d/requirements.txt" || true
+  [ -f "$d/requirements.txt" ] && pip install -q -c "$CONSTRAINTS" -r "$d/requirements.txt" || true
 done
 
-echo "== models =="
-# insightface packs for InstantID (antelopev2) + eval (buffalo_l)
+echo "== torch sanity =="
+pip install -q $TORCH --index-url "$TORCH_IDX"   # safety net: a node dep may have moved it
 python - <<'PY'
-from insightface.app import FaceAnalysis
-for name in ("antelopev2", "buffalo_l"):
-    FaceAnalysis(name=name)  # triggers download to ~/.insightface/models
-    print("ok", name)
+import torch
+assert torch.cuda.is_available(), "CUDA not available after deps -- torch build vs driver mismatch"
+print("cuda ok:", torch.__version__, torch.cuda.get_device_name(0))
 PY
 
-dl() { # dest_subdir url
-  local dest="$COMFY/models/$1"; mkdir -p "$dest"
-  local fname; fname="$(basename "${2%%\?*}")"
-  if [ -f "$dest/$fname" ]; then echo "  have $fname"; return; fi
-  echo "  get $fname -> $1"
-  wget -q --header="Authorization: Bearer $HF_TOKEN" -O "$dest/$fname" "$2"
-}
-grep -vE '^\s*#|^\s*$' "$MODELS_TXT" | while IFS='|' read -r dest url note; do
-  dest="$(echo "$dest" | xargs)"; url="$(echo "$url" | xargs)"
-  [ -n "$dest" ] && [ -n "$url" ] && dl "$dest" "$url"
-done
+echo "== insightface: buffalo_l (eval) =="
+python - <<'PY'
+from insightface.app import FaceAnalysis
+FaceAnalysis(name="buffalo_l")   # -> ~/.insightface/models/buffalo_l (04_eval.py default)
+print("ok buffalo_l")
+PY
+# antelopev2 (InstantID) comes from models.txt -> ComfyUI/models/insightface/models/antelopev2
+# (the GitHub release zip extracts to a broken nested path on insightface 0.7.3)
 
-# a few files need renaming to what the nodes expect
-cd "$COMFY/models"
-[ -f clip_vision/model.safetensors ] && mv -n clip_vision/model.safetensors clip_vision/CLIP-ViT-H-14.safetensors || true
-mkdir -p instantid && [ -f instantid/ip-adapter.bin ] || true
+echo "== models =="
+# parallel chunked downloads (hf_transfer) -- ~20x faster than single-stream wget
+HF_HUB_ENABLE_HF_TRANSFER=1 python "$ROOT/scripts/fetch_models.py"
 
 echo
 echo "done. start ComfyUI:"
-echo "  cd $COMFY && python main.py --listen 0.0.0.0 --port 8188"
+echo "  cd $COMFY && HF_HOME=$HF_HOME python main.py --listen 0.0.0.0 --port 8188"

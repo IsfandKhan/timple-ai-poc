@@ -9,7 +9,10 @@ between scenes — only pose, wardrobe layer, location, light, and expression ch
 
 ## Canonical description (use verbatim in prompts)
 
-> mara_vance, a 34-year-old woman of Greek heritage, warm olive skin, oval face with a
+The scripts read the `>`-quoted lines below and prepend the trigger word (Flux) or
+use them as-is (SDXL). Do not lead this block with the trigger word.
+
+> a 34-year-old woman of Greek heritage, warm olive skin, oval face with a
 > defined jaw, deep-set hazel eyes, thick dark eyebrows with a small vertical scar
 > through the right brow, straight nose, full lips, faint freckles across the nose,
 > dark brown wavy hair to the shoulders usually tied back in a low bun with loose
@@ -42,10 +45,10 @@ model — real expressions: concentration, mild fatigue, quiet satisfaction, ale
 
 ## Hero image
 
-- File: `character/hero.png`
-- Locked seed: `______` (fill after `01_build_dataset.py --stage hero`)
-- Prompt used: `______`
-- Base model for hero: Flux.1-dev
+- File: `character/hero.png`  (= `hero_candidates/hero_01.png`)
+- Locked seed: `1137`
+- Prompt: `a photo of <canonical description>, head and shoulders portrait, front view, neutral, soft window light, plain studio backdrop. photorealistic, 35mm portrait, natural light, realistic skin texture, film grain`
+- Base model for hero: Flux.1-dev (fp8), no LoRA, no ControlNet
 
 ## Negative / avoid
 

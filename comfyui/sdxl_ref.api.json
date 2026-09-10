@@ -1,0 +1,20 @@
+{
+  "1":  {"class_type": "CheckpointLoaderSimple", "inputs": {"ckpt_name": "RealVisXL_V5.0_fp16.safetensors"}, "_meta": {"title": "checkpoint"}},
+  "2":  {"class_type": "LoadImage", "inputs": {"image": "hero.png"}, "_meta": {"title": "face_ref"}},
+  "3":  {"class_type": "CLIPTextEncode", "inputs": {"text": "a photo of a woman", "clip": ["1", 1]}, "_meta": {"title": "positive"}},
+  "4":  {"class_type": "CLIPTextEncode", "inputs": {"text": "lowres, deformed", "clip": ["1", 1]}, "_meta": {"title": "negative"}},
+  "5":  {"class_type": "EmptyLatentImage", "inputs": {"width": 896, "height": 1152, "batch_size": 1}, "_meta": {"title": "latent"}},
+  "6":  {"class_type": "InstantIDModelLoader", "inputs": {"instantid_file": "ip-adapter.bin"}, "_meta": {"title": "instantid_loader"}},
+  "7":  {"class_type": "InstantIDFaceAnalysis", "inputs": {"provider": "CUDA"}, "_meta": {"title": "instantid_faceanalysis"}},
+  "8":  {"class_type": "ControlNetLoader", "inputs": {"control_net_name": "instantid-controlnet.safetensors"}, "_meta": {"title": "instantid_cn_loader"}},
+  "9":  {"class_type": "ApplyInstantID", "inputs": {"instantid": ["6", 0], "insightface": ["7", 0], "control_net": ["8", 0], "image": ["2", 0], "model": ["1", 0], "positive": ["3", 0], "negative": ["4", 0], "weight": 0.65, "start_at": 0.0, "end_at": 1.0}, "_meta": {"title": "instantid_apply"}},
+  "10": {"class_type": "IPAdapterUnifiedLoaderFaceID", "inputs": {"model": ["9", 0], "preset": "FACEID PLUS V2", "lora_strength": 0.6, "provider": "CUDA"}, "_meta": {"title": "ipadapter_loader"}},
+  "11": {"class_type": "IPAdapterFaceID", "inputs": {"model": ["10", 0], "ipadapter": ["10", 1], "image": ["2", 0], "weight": 0.75, "weight_faceidv2": 1.0, "weight_type": "linear", "combine_embeds": "concat", "start_at": 0.0, "end_at": 1.0, "embeds_scaling": "V only"}, "_meta": {"title": "ipadapter"}},
+  "12": {"class_type": "LoadImage", "inputs": {"image": "_neutral.png"}, "_meta": {"title": "pose_image"}},
+  "13": {"class_type": "DWPreprocessor", "inputs": {"image": ["12", 0], "detect_hand": "enable", "detect_body": "enable", "detect_face": "enable", "resolution": 1024}, "_meta": {"title": "dwpose"}},
+  "14": {"class_type": "ControlNetLoader", "inputs": {"control_net_name": "OpenPoseXL2.safetensors"}, "_meta": {"title": "pose_cn_loader"}},
+  "15": {"class_type": "ControlNetApplyAdvanced", "inputs": {"positive": ["9", 1], "negative": ["9", 2], "control_net": ["14", 0], "image": ["13", 0], "strength": 0.6, "start_percent": 0.0, "end_percent": 0.8}, "_meta": {"title": "controlnet_pose_apply"}},
+  "16": {"class_type": "KSampler", "inputs": {"model": ["11", 0], "positive": ["15", 0], "negative": ["15", 1], "latent_image": ["5", 0], "seed": 42, "steps": 30, "cfg": 5.0, "sampler_name": "dpmpp_2m_sde_gpu", "scheduler": "karras", "denoise": 1.0}, "_meta": {"title": "sampler"}},
+  "17": {"class_type": "VAEDecode", "inputs": {"samples": ["16", 0], "vae": ["1", 2]}, "_meta": {"title": "vae_decode"}},
+  "18": {"class_type": "SaveImage", "inputs": {"images": ["17", 0], "filename_prefix": "sdxl_ref"}, "_meta": {"title": "save"}}
+}

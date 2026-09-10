@@ -13,3 +13,5 @@ character/hero.png
 __pycache__/
 output/
 .env
+character/dataset/.aitk_size.json
+.vercel

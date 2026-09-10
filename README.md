@@ -27,8 +27,11 @@ Covers every tool Svetlana named: Flux, SDXL, ComfyUI, LoRA, IP-Adapter.
 | `scripts/01_build_dataset.py` | Bootstrap ~30 varied training images of the character |
 | `scripts/02_train_lora.sh` | Flux character LoRA training (ai-toolkit) |
 | `scripts/03_generate.py` | Batch-generate all 12 scenes through both pipelines |
-| `scripts/04_eval.py` | Consistency scoring + heatmap + report (runs on the Mac) |
-| `scripts/05_contact_sheet.py` | Assemble the final comparison grid |
+| `scripts/04_eval.py` | Consistency scoring + heatmap + report |
+| `scripts/05_contact_sheet.py` | Assemble the contact / comparison grids |
+| `scripts/07_finish.sh` | Post-training: install LoRA, render both pipelines, score, compare |
+| `comfyui/*.api.json` | The two ComfyUI graphs (pre-authored, patched by node title) |
+| `APPROACH.md` | The write-up — results, the tradeoff, production call, evolution plan |
 
 ## Deliverable to Svetlana
 
@@ -39,5 +42,4 @@ Covers every tool Svetlana named: Flux, SDXL, ComfyUI, LoRA, IP-Adapter.
 
 ## Budget
 
-RunPod RTX 4090 community ~$0.44/hr. Pod stopped during training waits and write-up.
-~30 active GPU-hours + storage ≈ **$15–20**.
+RunPod RTX 4090 (Secure). Actual spend tracked against a ~$25 ceiling.

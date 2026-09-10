@@ -1,41 +1,47 @@
-# Models to download. 00_setup.sh reads this. Format: DEST_DIR | URL | NOTE
-# DEST_DIR is relative to ComfyUI/models/
+# Models to download. 00_setup.sh reads this.
+# Format:  DEST_DIR | FILENAME | URL       (DEST_DIR is under ComfyUI/models/)
+# FILENAME is the exact name the ComfyUI nodes expect — no rename step.
 
-# --- Flux.1-dev (GATED: accept license, needs HF_TOKEN) ---
-unet            | https://huggingface.co/black-forest-labs/FLUX.1-dev/resolve/main/flux1-dev.safetensors        | ~23GB; or use fp8 below to save VRAM
-unet            | https://huggingface.co/Comfy-Org/flux1-dev/resolve/main/flux1-dev-fp8.safetensors             | fp8, ~11GB, preferred on 4090
-clip            | https://huggingface.co/comfyanonymous/flux_text_encoders/resolve/main/t5xxl_fp8_e4m3fn.safetensors | T5
-clip            | https://huggingface.co/comfyanonymous/flux_text_encoders/resolve/main/clip_l.safetensors      |
-vae             | https://huggingface.co/black-forest-labs/FLUX.1-dev/resolve/main/ae.safetensors                | Flux VAE
+# --- Flux.1-dev, fp8 (GATED source for VAE; needs HF_TOKEN + accepted license) ---
+unet           | flux1-dev-fp8.safetensors                       | https://huggingface.co/Comfy-Org/flux1-dev/resolve/main/flux1-dev-fp8.safetensors
+clip           | t5xxl_fp8_e4m3fn.safetensors                    | https://huggingface.co/comfyanonymous/flux_text_encoders/resolve/main/t5xxl_fp8_e4m3fn.safetensors
+clip           | clip_l.safetensors                             | https://huggingface.co/comfyanonymous/flux_text_encoders/resolve/main/clip_l.safetensors
+vae            | ae.safetensors                                  | https://huggingface.co/black-forest-labs/FLUX.1-dev/resolve/main/ae.safetensors
 
-# --- Flux ControlNet (OpenPose) ---
-controlnet      | https://huggingface.co/InstantX/FLUX.1-dev-Controlnet-Union/resolve/main/diffusion_pytorch_model.safetensors | rename to flux-controlnet-union.safetensors; supports openpose mode
+# --- Flux ControlNet (InstantX Union, openpose mode) ---
+controlnet     | flux-controlnet-union.safetensors               | https://huggingface.co/InstantX/FLUX.1-dev-Controlnet-Union/resolve/main/diffusion_pytorch_model.safetensors
 
-# --- Flux IP-Adapter (used only if we also try IPA on Flux; optional) ---
-# xlabs/ipadapter | https://huggingface.co/XLabs-AI/flux-ip-adapter/resolve/main/ip_adapter.safetensors        | optional
+# --- SDXL base (photoreal finetune for skin) ---
+checkpoints    | RealVisXL_V5.0_fp16.safetensors                 | https://huggingface.co/SG161222/RealVisXL_V5.0/resolve/main/RealVisXL_V5.0_fp16.safetensors
 
-# --- SDXL base ---
-checkpoints     | https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/resolve/main/sd_xl_base_1.0.safetensors | or a photoreal finetune (RealVisXL V5.0) for better skin
-checkpoints     | https://huggingface.co/SG161222/RealVisXL_V5.0/resolve/main/RealVisXL_V5.0.safetensors        | recommended base for Pipeline B
+# --- IP-Adapter FaceID Plus v2 (SDXL) + companion LoRA + CLIP vision ---
+ipadapter      | ip-adapter-faceid-plusv2_sdxl.bin               | https://huggingface.co/h94/IP-Adapter-FaceID/resolve/main/ip-adapter-faceid-plusv2_sdxl.bin
+loras          | ip-adapter-faceid-plusv2_sdxl_lora.safetensors  | https://huggingface.co/h94/IP-Adapter-FaceID/resolve/main/ip-adapter-faceid-plusv2_sdxl_lora.safetensors
+clip_vision    | CLIP-ViT-H-14-laion2B-s32B-b79K.safetensors     | https://huggingface.co/h94/IP-Adapter/resolve/main/models/image_encoder/model.safetensors
 
-# --- IP-Adapter (SDXL, FaceID) ---
-ipadapter       | https://huggingface.co/h94/IP-Adapter-FaceID/resolve/main/ip-adapter-faceid-plusv2_sdxl.bin  | FaceID Plus v2
-ipadapter       | https://huggingface.co/h94/IP-Adapter-FaceID/resolve/main/ip-adapter-faceid-plusv2_sdxl_lora.safetensors | its companion LoRA
-clip_vision     | https://huggingface.co/h94/IP-Adapter/resolve/main/models/image_encoder/model.safetensors      | rename CLIP-ViT-H-14.safetensors
-
-# --- InstantID (SDXL) ---
-instantid       | https://huggingface.co/InstantX/InstantID/resolve/main/ip-adapter.bin                        | -> models/instantid/
-controlnet      | https://huggingface.co/InstantX/InstantID/resolve/main/ControlNetModel/diffusion_pytorch_model.safetensors | -> models/controlnet/instantid-controlnet.safetensors
+# --- InstantID (SDXL): ip-adapter + its ControlNet ---
+instantid      | ip-adapter.bin                                  | https://huggingface.co/InstantX/InstantID/resolve/main/ip-adapter.bin
+controlnet     | instantid-controlnet.safetensors                | https://huggingface.co/InstantX/InstantID/resolve/main/ControlNetModel/diffusion_pytorch_model.safetensors
 
 # --- SDXL ControlNet OpenPose ---
-controlnet      | https://huggingface.co/thibaud/controlnet-openpose-sdxl-1.0/resolve/main/OpenPoseXL2.safetensors |
+controlnet     | OpenPoseXL2.safetensors                         | https://huggingface.co/thibaud/controlnet-openpose-sdxl-1.0/resolve/main/OpenPoseXL2.safetensors
 
 # --- Upscaler ---
-upscale_models  | https://huggingface.co/uwg/upscaler/resolve/main/ESRGAN/4x-UltraSharp.pth                     |
+upscale_models | 4x-UltraSharp.pth                               | https://huggingface.co/uwg/upscaler/resolve/main/ESRGAN/4x-UltraSharp.pth
 
-# --- Face detection / eval (InsightFace) ---
-# antelopev2 (InstantID) and buffalo_l (eval) auto-download via insightface on first run;
-# 00_setup.sh pre-fetches them to ~/.insightface/models/
+# --- FaceDetailer face bbox model (Impact Pack, second-pass refinement) ---
+ultralytics/bbox | face_yolov8m.pt                               | https://huggingface.co/Bingsu/adetailer/resolve/main/face_yolov8m.pt
 
-# --- Auto-caption ---
-# Florence-2 base downloads via transformers on first use (01_build_dataset.py --stage caption)
+# --- placeholder so the Flux graph validates before training (loaded at strength 0 only;
+#     02_train_lora.sh overwrites this file with the real trained LoRA) ---
+loras          | mara_lora.safetensors                           | https://huggingface.co/XLabs-AI/flux-lora-collection/resolve/main/realism_lora.safetensors
+
+# --- InsightFace antelopev2 pack (InstantID face analysis); GitHub zip is broken-nested ---
+insightface/models/antelopev2 | scrfd_10g_bnkps.onnx | https://huggingface.co/DIAMONIK7777/antelopev2/resolve/main/scrfd_10g_bnkps.onnx
+insightface/models/antelopev2 | 1k3d68.onnx          | https://huggingface.co/DIAMONIK7777/antelopev2/resolve/main/1k3d68.onnx
+insightface/models/antelopev2 | 2d106det.onnx        | https://huggingface.co/DIAMONIK7777/antelopev2/resolve/main/2d106det.onnx
+insightface/models/antelopev2 | genderage.onnx       | https://huggingface.co/DIAMONIK7777/antelopev2/resolve/main/genderage.onnx
+insightface/models/antelopev2 | glintr100.onnx       | https://huggingface.co/DIAMONIK7777/antelopev2/resolve/main/glintr100.onnx
+
+# buffalo_l (eval) auto-downloads via insightface in 00_setup.sh.
+# Florence-2 downloads via transformers on first use (01_build_dataset.py --stage caption).

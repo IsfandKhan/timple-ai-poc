@@ -15,7 +15,7 @@ negative: >
   deformed hands, blonde hair, blue eyes
 
 scenes:
-  - id: 01
+  - id: "01"
     title: Dawn at camp
     prompt: >
       standing outside a canvas tent at first light, holding an enamel mug of coffee,
@@ -25,7 +25,7 @@ scenes:
     framing: half
     seed: 101
 
-  - id: 02
+  - id: "02"
     title: Field notes
     prompt: >
       sitting on a folding stool at a small table, writing in a leather field notebook,
@@ -35,7 +35,7 @@ scenes:
     framing: half
     seed: 102
 
-  - id: 03
+  - id: "03"
     title: Examining the artifact
     prompt: >
       crouching over a half-buried stone fragment in a dig trench, brushing soil away
@@ -44,7 +44,7 @@ scenes:
     framing: full
     seed: 103
 
-  - id: 04
+  - id: "04"
     title: Ridge hike
     prompt: >
       walking along a rocky ridge trail with a daypack, looking back over her shoulder
@@ -53,7 +53,7 @@ scenes:
     framing: full
     seed: 104
 
-  - id: 05
+  - id: "05"
     title: Radio call
     prompt: >
       standing, holding a handheld radio to her mouth mid-sentence, other hand on hip,
@@ -62,7 +62,7 @@ scenes:
     framing: half
     seed: 105
 
-  - id: 06
+  - id: "06"
     title: The storm
     prompt: >
       hunched under a rain shell in heavy rain, one hand shielding her eyes, squinting,
@@ -71,7 +71,7 @@ scenes:
     framing: half
     seed: 106
 
-  - id: 07
+  - id: "07"
     title: Village market
     prompt: >
       standing at a market stall in a small mountain village, holding up a woven textile
@@ -80,7 +80,7 @@ scenes:
     framing: full
     seed: 107
 
-  - id: 08
+  - id: "08"
     title: Shared meal
     prompt: >
       seated at a long wooden table with locals, mid-conversation, laughing lightly,
@@ -89,7 +89,7 @@ scenes:
     framing: half
     seed: 108
 
-  - id: 09
+  - id: "09"
     title: Close portrait
     prompt: >
       tight head-and-shoulders portrait at dusk, soft blue hour light, hair down,
@@ -98,7 +98,7 @@ scenes:
     framing: close
     seed: 109
 
-  - id: 10
+  - id: "10"
     title: Lantern work
     prompt: >
       at night in the tent, leaning over the artifact under a battery lantern,
@@ -107,7 +107,7 @@ scenes:
     framing: half
     seed: 110
 
-  - id: 11
+  - id: "11"
     title: Stargazing
     prompt: >
       lying back against a rock looking up at a dense night sky, hands behind head,
@@ -116,7 +116,7 @@ scenes:
     framing: full
     seed: 111
 
-  - id: 12
+  - id: "12"
     title: Departure
     prompt: >
       standing by a dusty parked truck at sunrise, backpack on one shoulder, looking

@@ -46,7 +46,9 @@ config:
       model:
         name_or_path: black-forest-labs/FLUX.1-dev
         is_flux: true
-        quantize: true          # fits 24GB
+        quantize: true          # fp8 transformer
+        low_vram: true          # layer-by-layer quantize + T5 offload -- fits Flux LoRA on 24GB
+        # quantize_te left off: quantizing T5 garbles ai-toolkit's sample pipeline (noise previews)
 
       sample:
         sampler: flowmatch
